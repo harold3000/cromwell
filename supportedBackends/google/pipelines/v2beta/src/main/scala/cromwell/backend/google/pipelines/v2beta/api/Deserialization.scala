@@ -10,9 +10,12 @@ import cats.syntax.validated._
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.json.{GenericJson, JsonObjectParser}
 import com.google.api.services.lifesciences.v2beta.model._
+import com.typesafe.scalalogging.Logger
 import common.validation.ErrorOr._
 import common.validation.Validation._
+import cwl.ontology.Schema.getClass
 import mouse.all._
+import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
@@ -26,6 +29,8 @@ import scala.util.Try
   * This class provides implicit functions to deserialize those map to their proper type.
   */
 private [api] object Deserialization {
+
+  private val logger: Logger = Logger(LoggerFactory.getLogger(getClass.getName))
 
   private val jsonFactory = new JacksonFactory
   private val jsonParser = new JsonObjectParser.Builder(jsonFactory).build
@@ -74,6 +79,7 @@ private [api] object Deserialization {
     */
   private [api] def deserializeTo[T <: GenericJson](attributes: JMap[String, Object])(implicit tag: ClassTag[T]): Try[T] = Try {
     val jsonString = jsonFactory.toString(attributes)
+    logger.info(jsonString)
     jsonParser.parseAndClose[T](new ByteArrayInputStream(jsonString.getBytes), StandardCharsets.UTF_8, tag.runtimeClass.asInstanceOf[Class[T]])
   }
 }
