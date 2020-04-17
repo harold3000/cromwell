@@ -13,7 +13,6 @@ import com.google.api.services.lifesciences.v2beta.model._
 import com.typesafe.scalalogging.Logger
 import common.validation.ErrorOr._
 import common.validation.Validation._
-import cwl.ontology.Schema.getClass
 import mouse.all._
 import org.slf4j.LoggerFactory
 
