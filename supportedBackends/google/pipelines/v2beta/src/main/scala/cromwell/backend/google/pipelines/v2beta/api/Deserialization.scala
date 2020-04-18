@@ -78,7 +78,7 @@ private [api] object Deserialization {
     */
   private [api] def deserializeTo[T <: GenericJson](attributes: JMap[String, Object])(implicit tag: ClassTag[T]): Try[T] = Try {
     val jsonString = jsonFactory.toString(attributes)
-    logger.info(jsonString)
+    logger.info(Thread.currentThread.getName + " " + jsonString)
     jsonParser.parseAndClose[T](new ByteArrayInputStream(jsonString.getBytes), StandardCharsets.UTF_8, tag.runtimeClass.asInstanceOf[Class[T]])
   }
 }
