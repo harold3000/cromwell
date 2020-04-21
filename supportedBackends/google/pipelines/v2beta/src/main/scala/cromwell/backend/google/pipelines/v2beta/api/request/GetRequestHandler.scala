@@ -6,18 +6,20 @@ import akka.actor.ActorRef
 import com.google.api.client.googleapis.batch.BatchRequest
 import com.google.api.client.googleapis.json.GoogleJsonError
 import com.google.api.services.lifesciences.v2beta.model._
+import com.typesafe.scalalogging.Logger
 import common.validation.Validation._
 import cromwell.backend.google.pipelines.common.api.PipelinesApiRequestManager._
 import cromwell.backend.google.pipelines.common.api.RunStatus
 import cromwell.backend.google.pipelines.common.api.RunStatus.{Initializing, Running, Success, UnsuccessfulRunStatus}
 import cromwell.backend.google.pipelines.v2beta.PipelinesConversions._
 import cromwell.backend.google.pipelines.v2beta.api.ActionBuilder.Labels.Key
-import cromwell.backend.google.pipelines.v2beta.api.Deserialization._
+import cromwell.backend.google.pipelines.v2beta.api.Deserialization.{getClass, _}
 import cromwell.backend.google.pipelines.v2beta.api.request.ErrorReporter._
 import cromwell.cloudsupport.gcp.auth.GoogleAuthMode
 import cromwell.core.ExecutionEvent
 import io.grpc.Status
 import org.apache.commons.lang3.exception.ExceptionUtils
+import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,6 +27,9 @@ import scala.language.postfixOps
 import scala.util.{Failure, Try, Success => TrySuccess}
 
 trait GetRequestHandler { this: RequestHandler =>
+
+  private val logger: Logger = Logger(LoggerFactory.getLogger(getClass.getName))
+
   // the Genomics batch endpoint doesn't seem to be able to handle get requests on V2 operations at the moment
   // For now, don't batch the request and execute it on its own 
   def handleRequest(pollingRequest: PAPIStatusPollRequest, batch: BatchRequest, pollingManager: ActorRef)(implicit ec: ExecutionContext): Future[Try[Unit]] = Future(pollingRequest.httpRequest.execute()) map {
@@ -56,6 +61,7 @@ trait GetRequestHandler { this: RequestHandler =>
         if (operation.getDone) {
           val metadata = Try(operation.getMetadata.asScala.toMap).getOrElse(Map[String, AnyRef]())
           // Deserialize the response
+          logger.info(Thread.currentThread.getName + " " + pollingRequest.jobId)
           val events: List[Event] = operation.events.fallBackTo(List.empty)(pollingRequest.workflowId -> operation)
           val pipeline: Option[Pipeline] = operation.pipeline.flatMap(
             _.toErrorOr.fallBack(pollingRequest.workflowId -> operation)
