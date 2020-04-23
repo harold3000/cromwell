@@ -10,11 +10,11 @@ import cats.syntax.validated._
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.json.{GenericJson, JsonObjectParser}
 import com.google.api.services.lifesciences.v2beta.model._
-import com.typesafe.scalalogging.Logger
+//import com.typesafe.scalalogging.Logger
 import common.validation.ErrorOr._
 import common.validation.Validation._
 import mouse.all._
-import org.slf4j.LoggerFactory
+//import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
@@ -29,7 +29,7 @@ import scala.util.Try
   */
 private [api] object Deserialization {
 
-  private val logger: Logger = Logger(LoggerFactory.getLogger(getClass.getName))
+  //private val logger: Logger = Logger(LoggerFactory.getLogger(getClass.getName))
 
   private val jsonFactory = new JacksonFactory
   private val jsonParser = new JsonObjectParser.Builder(jsonFactory).build
@@ -84,7 +84,7 @@ private [api] object Deserialization {
   //salt
   private [api] def deserializeToEvent(attributes: JMap[String, Object]): Try[Event] = Try {
     val jsonString = jsonFactory.toString(attributes)
-    logger.info(Thread.currentThread.getName + " " + jsonString)
+    //logger.info(Thread.currentThread.getName + " " + jsonString)
     jsonParser.parseAndClose[Event](new ByteArrayInputStream(jsonString.getBytes), StandardCharsets.UTF_8, classOf[Event])
   }
 }
