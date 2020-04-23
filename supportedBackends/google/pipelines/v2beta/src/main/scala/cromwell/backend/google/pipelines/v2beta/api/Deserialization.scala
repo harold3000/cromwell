@@ -81,6 +81,7 @@ private [api] object Deserialization {
     jsonParser.parseAndClose[T](new ByteArrayInputStream(jsonString.getBytes), StandardCharsets.UTF_8, tag.runtimeClass.asInstanceOf[Class[T]])
   }
 
+  //salt
   private [api] def deserializeToEvent(attributes: JMap[String, Object]): Try[Event] = Try {
     val jsonString = jsonFactory.toString(attributes)
     logger.info(Thread.currentThread.getName + " " + jsonString)
